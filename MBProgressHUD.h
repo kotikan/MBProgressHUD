@@ -88,6 +88,8 @@ typedef enum {
 	BOOL square;
 	
 	float margin;
+	float padding;
+	float paddingMultiplier;
 	
 	BOOL dimBackground;
 	
@@ -239,6 +241,20 @@ typedef enum {
  * Defaults to 20.0
  */
 @property (assign) float margin;
+
+/**
+ * The amounth of space around the HUD elements (labels, indicators or custom views).
+ *
+ * Defaults to 4
+ */
+@property (assign) float padding;
+
+/**
+ * A multiplier to increase the padding between elements
+ *
+ * Defaults to 1
+ */
+@property (assign) float paddingMultiplier;
 
 /** 
  * Cover the HUD background view with a radial gradient. 

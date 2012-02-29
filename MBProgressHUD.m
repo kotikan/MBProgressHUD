@@ -62,6 +62,8 @@
 @synthesize minSize;
 @synthesize square;
 @synthesize margin;
+@synthesize padding;
+@synthesize paddingMultiplier;
 @synthesize dimBackground;
 
 @synthesize graceTime;
@@ -291,6 +293,8 @@
         self.yOffset = 0.0f;
 		self.dimBackground = NO;
 		self.margin = 20.0f;
+        self.padding = PADDING;
+        self.paddingMultiplier = 1;
 		self.graceTime = 0.0f;
 		self.minShowTime = 0.0f;
 		self.removeFromSuperViewOnHide = NO;
@@ -377,15 +381,15 @@
         if (self.width < (lWidth + 2 * margin)) {
             self.width = lWidth + 2 * margin;
         }
-        self.height = self.height + lHeight + PADDING;
+        self.height = self.height + lHeight + padding;
 		
         // Move indicator to make room for the label
-        indFrame.origin.y -= (floorf(lHeight / 2 + PADDING / 2));
+        indFrame.origin.y -= (floorf(lHeight / 2 + padding / 2));
         indicator.frame = indFrame;
 		
         // Set the label position and dimensions
         CGRect lFrame = CGRectMake(floorf((frame.size.width - lWidth) / 2) + xOffset,
-                                   floorf(indFrame.origin.y + indFrame.size.height + PADDING),
+                                   floorf(indFrame.origin.y + indFrame.size.height + paddingMultiplier*padding),
                                    lWidth, lHeight);
         label.frame = lFrame;
 		
@@ -413,19 +417,19 @@
             if (self.width < lWidth) {
                 self.width = lWidth + 2 * margin;
             }
-            self.height = self.height + lHeight + PADDING;
+            self.height = self.height + lHeight + padding;
 			
             // Move indicator to make room for the new label
-            indFrame.origin.y -= (floorf(lHeight / 2 + PADDING / 2));
+            indFrame.origin.y -= (floorf(lHeight / 2 + padding / 2));
             indicator.frame = indFrame;
 			
             // Move first label to make room for the new label
-            lFrame.origin.y -= (floorf(lHeight / 2 + PADDING / 2));
+            lFrame.origin.y -= (floorf(lHeight / 2 + padding / 2));
             label.frame = lFrame;
 			
             // Set label position and dimensions
             CGRect lFrameD = CGRectMake(floorf((frame.size.width - lWidth) / 2) + xOffset,
-                                        lFrame.origin.y + lFrame.size.height + PADDING, lWidth, lHeight);
+                                        lFrame.origin.y + lFrame.size.height + paddingMultiplier*padding, lWidth, lHeight);
             detailsLabel.frame = lFrameD;
 			
             [self addSubview:detailsLabel];
