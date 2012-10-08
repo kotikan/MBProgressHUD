@@ -256,6 +256,11 @@ typedef enum {
  */
 @property (assign) float paddingMultiplier;
 
+/**
+ * Set maximum number of lines the label can display across
+ */
+- (void)setLabelMaxLines:(int)newMaxLines;
+
 /** 
  * Cover the HUD background view with a radial gradient. 
  */
