@@ -116,6 +116,21 @@
 	return labelText;
 }
 
+- (void)setLabelMaxLines:(int)newMaxLines {
+    label.numberOfLines = newMaxLines;
+    if ([NSThread isMainThread]) {
+		[self setNeedsLayout];
+		[self setNeedsDisplay];
+	} else {
+		[self performSelectorOnMainThread:@selector(setNeedsLayout) withObject:nil waitUntilDone:NO];
+		[self performSelectorOnMainThread:@selector(setNeedsDisplay) withObject:nil waitUntilDone:NO];
+	}
+}
+
+- (int)labelMaxLines {
+	return label.numberOfLines;
+}
+
 - (void)setDetailsLabelText:(NSString *)newText {
 	if ([NSThread isMainThread]) {
 		[self updateDetailsLabelText:newText];
@@ -356,18 +371,11 @@
     // Add label if label text was set
     if (nil != self.labelText) {
         // Get size of label text
-        CGSize dims = [self.labelText sizeWithFont:self.labelFont];
-		
-        // Compute label dimensions based on font metrics if size is larger than max then clip the label width
-        float lHeight = dims.height;
-        float lWidth;
-        if (dims.width <= (frame.size.width - 4 * margin)) {
-            lWidth = dims.width;
-        }
-        else {
-            lWidth = frame.size.width - 4 * margin;
-        }
-		
+        CGFloat lLineHeight = [self.labelText sizeWithFont:self.labelFont].height;
+        CGSize lSize = [self.labelText sizeWithFont:self.labelFont
+                                  constrainedToSize:CGSizeMake(frame.size.width - 4 * margin, lLineHeight * label.numberOfLines)
+                                      lineBreakMode:UILineBreakModeWordWrap];
+        
         // Set label properties
         label.font = self.labelFont;
         label.adjustsFontSizeToFitWidth = NO;
@@ -378,19 +386,19 @@
         label.text = self.labelText;
 		
         // Update HUD size
-        if (self.width < (lWidth + 2 * margin)) {
-            self.width = lWidth + 2 * margin;
+        if (self.width < (lSize.width + 2 * margin)) {
+            self.width = lSize.width + 2 * margin;
         }
-        self.height = self.height + lHeight + padding;
+        self.height = self.height + lSize.height + padding;
 		
         // Move indicator to make room for the label
-        indFrame.origin.y -= (floorf(lHeight / 2 + padding / 2));
+        indFrame.origin.y -= (floorf(lSize.height / 2 + padding / 2));
         indicator.frame = indFrame;
 		
         // Set the label position and dimensions
-        CGRect lFrame = CGRectMake(floorf((frame.size.width - lWidth) / 2) + xOffset,
+        CGRect lFrame = CGRectMake(floorf((frame.size.width - lSize.width) / 2) + xOffset,
                                    floorf(indFrame.origin.y + indFrame.size.height + paddingMultiplier*padding),
-                                   lWidth, lHeight);
+                                   lSize.width, lSize.height);
         label.frame = lFrame;
 		
         [self addSubview:label];
@@ -409,27 +417,27 @@
             detailsLabel.numberOfLines = 0;
 
 			CGFloat maxHeight = frame.size.height - self.height - 2*margin;
-			CGSize labelSize = [detailsLabel.text sizeWithFont:detailsLabel.font constrainedToSize:CGSizeMake(frame.size.width - 4*margin, maxHeight) lineBreakMode:detailsLabel.lineBreakMode];
-            lHeight = labelSize.height;
-            lWidth = labelSize.width;
+			lSize = [detailsLabel.text sizeWithFont:detailsLabel.font
+                                  constrainedToSize:CGSizeMake(frame.size.width - 4*margin, maxHeight)
+                                      lineBreakMode:detailsLabel.lineBreakMode];
 			
             // Update HUD size
-            if (self.width < lWidth) {
-                self.width = lWidth + 2 * margin;
+            if (self.width < lSize.width) {
+                self.width = lSize.width + 2 * margin;
             }
-            self.height = self.height + lHeight + padding;
+            self.height = self.height + lSize.height + padding;
 			
             // Move indicator to make room for the new label
-            indFrame.origin.y -= (floorf(lHeight / 2 + padding / 2));
+            indFrame.origin.y -= (floorf(lSize.height / 2 + padding / 2));
             indicator.frame = indFrame;
 			
             // Move first label to make room for the new label
-            lFrame.origin.y -= (floorf(lHeight / 2 + padding / 2));
+            lFrame.origin.y -= (floorf(lSize.height / 2 + padding / 2));
             label.frame = lFrame;
 			
             // Set label position and dimensions
-            CGRect lFrameD = CGRectMake(floorf((frame.size.width - lWidth) / 2) + xOffset,
-                                        lFrame.origin.y + lFrame.size.height + paddingMultiplier*padding, lWidth, lHeight);
+            CGRect lFrameD = CGRectMake(floorf((frame.size.width - lSize.width) / 2) + xOffset,
+                                        lFrame.origin.y + lFrame.size.height + paddingMultiplier*padding, lSize.width, lSize.height);
             detailsLabel.frame = lFrameD;
 			
             [self addSubview:detailsLabel];
